@@ -1,0 +1,26 @@
+
+# Python
+__pycache__/
+*.pyc
+
+# Colab / Jupyter
+.ipynb_checkpoints/
+.config/
+drive/
+sample_data/
+
+# Local data
+data/
+*.csv
+*.zip
+
+# Environment
+.env
+.venv/
+venv/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Local app backups
+app.py.before_*
