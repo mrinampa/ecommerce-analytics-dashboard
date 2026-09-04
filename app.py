@@ -786,7 +786,7 @@ with st.sidebar:
         padding:18px 16px;
         border:1px solid rgba(245,158,11,0.45);
         border-radius:14px;
-        background:linear-gradient(135deg,rgba(245,158,11,0.16),rgba(143,48,79,0.08));
+        background:linear-gradient(135deg,rgba(245,158,11,0.16),rgba(180,83,9,0.08));
         ">
         <div style="color:#F59E0B;font-size:10px;font-weight:700;letter-spacing:1.5px;margin-bottom:7px;">
         NEW • YOUR DATA
@@ -2147,6 +2147,43 @@ if page == "Business Insights":
 # ============================================================
 
 if page == "Forecast Your Business":
+
+    
+    # Forecast-specific orange styling.
+    # This override is injected only when the Forecast page is active.
+    st.markdown(
+        """
+        <style>
+        /* Forecast page eyebrow */
+        .page-eyebrow {
+            color: #F59E0B !important;
+        }
+
+        /* Forecast-specific radio/navigation accent */
+        div[role="radiogroup"] div[role="radio"][aria-checked="true"] {
+            border-color: #F59E0B !important;
+        }
+
+        div[role="radiogroup"] div[role="radio"][aria-checked="true"]::before {
+            background-color: #F59E0B !important;
+            border-color: #F59E0B !important;
+        }
+
+        div[role="radiogroup"] label:has(
+            div[role="radio"][aria-checked="true"]
+        ) {
+            border-color: #F59E0B !important;
+        }
+
+        /* Forecast page links/buttons that use the pink accent */
+        .forecast-orange-accent {
+            color: #F59E0B !important;
+            border-color: #F59E0B !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 
     st.markdown(
