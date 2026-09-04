@@ -887,6 +887,10 @@ titles = {
         "Business Insights",
         "Turn ecommerce performance data into clear business decisions."
     ),
+    "Forecast Your Business": (
+        "Forecast Your Business",
+        "Upload your own ecommerce data and explore projected business performance."
+    ),
 }
 
 title, description = titles[page]
