@@ -2531,7 +2531,7 @@ if page == "Forecast Your Business":
                     line-height:1.7;
                 ">
                     <div style="
-                        color:#F05A8A;
+                        color:#FF8A00;
                         font-weight:700;
                         font-size:11px;
                         letter-spacing:1px;
