@@ -806,7 +806,7 @@ with st.sidebar:
                 font-size:17px;
                 font-weight:700;
                 margin-bottom:6px;
-            ">🔮 Forecast Your Business</div>
+            ">Forecast Your Business</div>
 
             <div style="
                 color:#A89EA4;
@@ -824,7 +824,7 @@ with st.sidebar:
     page = st.radio(
         "Navigation",
         [
-            "🔮 Forecast Your Business",
+            "Forecast Your Business",
             "Overview",
             "Sales",
             "Customers",
@@ -2166,7 +2166,7 @@ if page == "Business Insights":
 # FORECAST YOUR BUSINESS
 # ============================================================
 
-if page == "🔮 Forecast Your Business":
+if page == "Forecast Your Business":
 
     st.markdown(
         '<div class="eyebrow">YOUR DATA • YOUR BUSINESS</div>'
