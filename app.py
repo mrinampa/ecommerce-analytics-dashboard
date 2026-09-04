@@ -173,13 +173,20 @@ rfm_reference_date = (
 rfm = (
     rfm_orders.groupby("customer_id")
     .agg(
-        recency=("order_purchase_timestamp",
-                 lambda x: (rfm_reference_date - x.max()).days),
+        last_purchase=("order_purchase_timestamp", "max"),
         frequency=("order_id", "nunique"),
         monetary=("order_revenue", "sum")
     )
     .reset_index()
 )
+
+rfm["recency"] = (
+    rfm_reference_date - rfm["last_purchase"]
+).dt.days
+
+rfm = rfm[
+    ["customer_id", "recency", "frequency", "monetary"]
+]
 
 rfm["R_Score"] = pd.qcut(
     rfm["recency"].rank(method="first"),
@@ -773,9 +780,51 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
+    st.markdown(
+        """
+        <div style="
+            margin: 8px 0 18px 0;
+            padding: 18px 16px;
+            border: 1px solid rgba(240,90,138,0.45);
+            border-radius: 14px;
+            background: linear-gradient(
+                135deg,
+                rgba(240,90,138,0.16),
+                rgba(143,48,79,0.08)
+            );
+        ">
+            <div style="
+                color:#F05A8A;
+                font-size:10px;
+                font-weight:700;
+                letter-spacing:1.5px;
+                margin-bottom:7px;
+            ">NEW • YOUR DATA</div>
+
+            <div style="
+                color:#F5EEF1;
+                font-size:17px;
+                font-weight:700;
+                margin-bottom:6px;
+            ">🔮 Forecast Your Business</div>
+
+            <div style="
+                color:#A89EA4;
+                font-size:11px;
+                line-height:1.5;
+            ">
+                Upload your own CSV or Excel data and turn it
+                into projections and business insights.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     page = st.radio(
         "Navigation",
         [
+            "🔮 Forecast Your Business",
             "Overview",
             "Sales",
             "Customers",
@@ -2107,3 +2156,445 @@ if page == "Business Insights":
         unsafe_allow_html=True
     )
 
+
+
+# ============================================================
+# FORECAST YOUR BUSINESS
+# ============================================================
+
+if page == "🔮 Forecast Your Business":
+
+    st.markdown(
+        '<div class="eyebrow">YOUR DATA • YOUR BUSINESS</div>'
+        '<div class="page-title">Forecast Your Business</div>'
+        '<div class="page-description">'
+        'Upload your own data and turn historical performance into '
+        'simple forward-looking projections.'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """
+        <div style="
+            padding:20px;
+            margin:20px 0 25px 0;
+            border-radius:16px;
+            border:1px solid #302830;
+            background:#110E12;
+        ">
+            <div style="
+                font-size:18px;
+                font-weight:700;
+                color:#F5EEF1;
+                margin-bottom:8px;
+            ">Bring your own business data</div>
+
+            <div style="
+                color:#A89EA4;
+                font-size:13px;
+                line-height:1.6;
+            ">
+                Upload a CSV or Excel file. We'll help you identify
+                the important columns, visualize the historical trend,
+                and create a simple projection.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    uploaded_file = st.file_uploader(
+        "Upload your CSV or Excel file",
+        type=["csv", "xlsx", "xls"],
+        help="For best results, include a date column and a numeric business metric such as sales, revenue, orders, or customers."
+    )
+
+    if uploaded_file is None:
+
+        st.info(
+            "👆 Upload a CSV or Excel file above to start exploring your business data."
+        )
+
+    else:
+
+        try:
+
+            if uploaded_file.name.lower().endswith(".csv"):
+                user_df = pd.read_csv(uploaded_file)
+            else:
+                user_df = pd.read_excel(uploaded_file)
+
+            if user_df.empty:
+                st.error("The uploaded file is empty.")
+                st.stop()
+
+            st.success(
+                f"✅ Loaded {len(user_df):,} rows and {len(user_df.columns):,} columns."
+            )
+
+            st.markdown("### 1. Preview your data")
+
+            st.dataframe(
+                user_df.head(10),
+                use_container_width=True,
+                hide_index=True
+            )
+
+            # ------------------------------------------------
+            # Detect possible date columns
+            # ------------------------------------------------
+
+            date_candidates = []
+
+            for col in user_df.columns:
+
+                col_lower = str(col).lower()
+
+                if any(
+                    keyword in col_lower
+                    for keyword in [
+                        "date",
+                        "time",
+                        "month",
+                        "day",
+                        "year"
+                    ]
+                ):
+                    date_candidates.append(col)
+
+            # Also test object columns for date-like values
+            for col in user_df.columns:
+
+                if col not in date_candidates:
+
+                    if user_df[col].dtype == "object":
+
+                        sample = user_df[col].dropna().head(20)
+
+                        if len(sample) > 0:
+
+                            parsed = pd.to_datetime(
+                                sample,
+                                errors="coerce"
+                            )
+
+                            if parsed.notna().mean() >= 0.7:
+                                date_candidates.append(col)
+
+            date_candidates = list(dict.fromkeys(date_candidates))
+
+            # ------------------------------------------------
+            # Numeric columns
+            # ------------------------------------------------
+
+            numeric_columns = list(
+                user_df.select_dtypes(
+                    include=np.number
+                ).columns
+            )
+
+            if not numeric_columns:
+
+                st.error(
+                    "I couldn't find a numeric column to analyze. "
+                    "Your file needs at least one numeric metric such as sales, revenue, orders, or customers."
+                )
+                st.stop()
+
+            st.markdown("### 2. Choose what you want to forecast")
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+
+                if date_candidates:
+
+                    date_col = st.selectbox(
+                        "Date column",
+                        date_candidates
+                    )
+
+                else:
+
+                    date_col = None
+
+                    st.warning(
+                        "No obvious date column was detected. "
+                        "We'll use the row order as the timeline."
+                    )
+
+            with col2:
+
+                metric_col = st.selectbox(
+                    "Metric to forecast",
+                    numeric_columns
+                )
+
+            # ------------------------------------------------
+            # Prepare data
+            # ------------------------------------------------
+
+            forecast_df = user_df.copy()
+
+            if date_col is not None:
+
+                forecast_df[date_col] = pd.to_datetime(
+                    forecast_df[date_col],
+                    errors="coerce"
+                )
+
+                forecast_df[metric_col] = pd.to_numeric(
+                    forecast_df[metric_col],
+                    errors="coerce"
+                )
+
+                forecast_df = forecast_df.dropna(
+                    subset=[date_col, metric_col]
+                )
+
+                if len(forecast_df) < 5:
+
+                    st.error(
+                        "There aren't enough valid date/metric observations "
+                        "to create a projection."
+                    )
+                    st.stop()
+
+                # Monthly aggregation keeps noisy transaction-level
+                # datasets easier to understand.
+                forecast_df["period"] = (
+                    forecast_df[date_col]
+                    .dt.to_period("M")
+                    .dt.to_timestamp()
+                )
+
+                trend_df = (
+                    forecast_df
+                    .groupby("period", as_index=False)[metric_col]
+                    .sum()
+                    .sort_values("period")
+                )
+
+                period_col = "period"
+
+            else:
+
+                forecast_df[metric_col] = pd.to_numeric(
+                    forecast_df[metric_col],
+                    errors="coerce"
+                )
+
+                forecast_df = forecast_df.dropna(
+                    subset=[metric_col]
+                )
+
+                if len(forecast_df) < 5:
+
+                    st.error(
+                        "There aren't enough numeric observations "
+                        "to create a projection."
+                    )
+                    st.stop()
+
+                trend_df = forecast_df[
+                    [metric_col]
+                ].reset_index(drop=True)
+
+                trend_df["period"] = np.arange(
+                    1,
+                    len(trend_df) + 1
+                )
+
+                period_col = "period"
+
+            # ------------------------------------------------
+            # Historical trend
+            # ------------------------------------------------
+
+            st.markdown("### 3. Historical performance")
+
+            chart_data = trend_df.copy()
+
+            st.line_chart(
+                chart_data.set_index(period_col)[metric_col],
+                use_container_width=True
+            )
+
+            # ------------------------------------------------
+            # Forecast
+            # ------------------------------------------------
+
+            st.markdown("### 4. Projection")
+
+            y = trend_df[metric_col].astype(float).values
+            x = np.arange(len(y), dtype=float)
+
+            slope, intercept = np.polyfit(x, y, 1)
+
+            history_count = len(y)
+
+            # Six future periods
+            future_x = np.arange(
+                history_count,
+                history_count + 6,
+                dtype=float
+            )
+
+            forecast_values = (
+                intercept + slope * future_x
+            )
+
+            forecast_values = np.maximum(
+                forecast_values,
+                0
+            )
+
+            if date_col is not None:
+
+                last_period = trend_df[period_col].max()
+
+                future_periods = pd.date_range(
+                    last_period + pd.offsets.MonthBegin(1),
+                    periods=6,
+                    freq="MS"
+                )
+
+            else:
+
+                future_periods = [
+                    f"Future {i}"
+                    for i in range(1, 7)
+                ]
+
+            forecast_result = pd.DataFrame(
+                {
+                    "period": future_periods,
+                    "Projected": forecast_values
+                }
+            )
+
+            st.line_chart(
+                forecast_result.set_index("period")["Projected"],
+                use_container_width=True
+            )
+
+            # ------------------------------------------------
+            # KPI cards
+            # ------------------------------------------------
+
+            latest_value = float(y[-1])
+            projected_value = float(forecast_values[-1])
+
+            if latest_value != 0:
+
+                projected_change = (
+                    (projected_value - latest_value)
+                    / abs(latest_value)
+                    * 100
+                )
+
+            else:
+
+                projected_change = 0
+
+            k1, k2, k3 = st.columns(3)
+
+            with k1:
+
+                st.metric(
+                    "Latest value",
+                    f"{latest_value:,.2f}"
+                )
+
+            with k2:
+
+                st.metric(
+                    "Projected value",
+                    f"{projected_value:,.2f}"
+                )
+
+            with k3:
+
+                st.metric(
+                    "Projected change",
+                    f"{projected_change:+.1f}%"
+                )
+
+            # ------------------------------------------------
+            # Business insights
+            # ------------------------------------------------
+
+            st.markdown("### 5. Business insights")
+
+            if slope > 0:
+
+                direction = "upward"
+
+                insight_text = (
+                    f"Your selected metric shows an **upward trend** "
+                    f"over the available history. The projection continues "
+                    f"that direction into the next six periods."
+                )
+
+            elif slope < 0:
+
+                direction = "downward"
+
+                insight_text = (
+                    f"Your selected metric shows a **downward trend** "
+                    f"over the available history. The projection continues "
+                    f"that direction into the next six periods."
+                )
+
+            else:
+
+                direction = "stable"
+
+                insight_text = (
+                    f"Your selected metric is relatively **stable** "
+                    f"over the available history, so the projection "
+                    f"remains close to its recent level."
+                )
+
+            st.markdown(
+                f"""
+                <div style="
+                    padding:20px;
+                    border-radius:14px;
+                    border:1px solid #302830;
+                    background:#110E12;
+                    line-height:1.7;
+                ">
+                    <div style="
+                        color:#F05A8A;
+                        font-weight:700;
+                        font-size:11px;
+                        letter-spacing:1px;
+                        margin-bottom:8px;
+                    ">AUTOMATED INSIGHT</div>
+
+                    <div style="
+                        color:#E8E0E4;
+                        font-size:14px;
+                    ">
+                        {insight_text}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            st.caption(
+                "Projection method: linear trend based on the uploaded historical data. "
+                "This is an analytical estimate, not a guarantee of future performance."
+            )
+
+        except Exception as e:
+
+            st.error(
+                "I couldn't analyze this file. "
+                "Please check that the file contains readable columns and valid data."
+            )
+
+            st.exception(e)
