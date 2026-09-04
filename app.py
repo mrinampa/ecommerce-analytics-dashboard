@@ -781,43 +781,23 @@ with st.sidebar:
     )
 
     st.markdown(
-        """
-        <div style="
-            margin: 8px 0 18px 0;
-            padding: 18px 16px;
-            border: 1px solid rgba(240,90,138,0.45);
-            border-radius: 14px;
-            background: linear-gradient(
-                135deg,
-                rgba(240,90,138,0.16),
-                rgba(143,48,79,0.08)
-            );
+        """<div style="
+        margin:8px 0 18px 0;
+        padding:18px 16px;
+        border:1px solid rgba(240,90,138,0.45);
+        border-radius:14px;
+        background:linear-gradient(135deg,rgba(240,90,138,0.16),rgba(143,48,79,0.08));
         ">
-            <div style="
-                color:#F05A8A;
-                font-size:10px;
-                font-weight:700;
-                letter-spacing:1.5px;
-                margin-bottom:7px;
-            ">NEW • YOUR DATA</div>
-
-            <div style="
-                color:#F5EEF1;
-                font-size:17px;
-                font-weight:700;
-                margin-bottom:6px;
-            ">Forecast Your Business</div>
-
-            <div style="
-                color:#A89EA4;
-                font-size:11px;
-                line-height:1.5;
-            ">
-                Upload your own CSV or Excel data and turn it
-                into projections and business insights.
-            </div>
+        <div style="color:#F05A8A;font-size:10px;font-weight:700;letter-spacing:1.5px;margin-bottom:7px;">
+        NEW • YOUR DATA
         </div>
-        """,
+        <div style="color:#F5EEF1;font-size:17px;font-weight:700;margin-bottom:6px;">
+        Forecast Your Business
+        </div>
+        <div style="color:#A89EA4;font-size:11px;line-height:1.5;">
+        Upload your own CSV or Excel data and turn it into projections and business insights.
+        </div>
+        </div>""",
         unsafe_allow_html=True
     )
 
@@ -2179,32 +2159,21 @@ if page == "Forecast Your Business":
     )
 
     st.markdown(
-        """
-        <div style="
-            padding:20px;
-            margin:20px 0 25px 0;
-            border-radius:16px;
-            border:1px solid #302830;
-            background:#110E12;
+        """<div style="
+        padding:20px;
+        margin:20px 0 25px 0;
+        border-radius:16px;
+        border:1px solid #302830;
+        background:#110E12;
         ">
-            <div style="
-                font-size:18px;
-                font-weight:700;
-                color:#F5EEF1;
-                margin-bottom:8px;
-            ">Bring your own business data</div>
-
-            <div style="
-                color:#A89EA4;
-                font-size:13px;
-                line-height:1.6;
-            ">
-                Upload a CSV or Excel file. We'll help you identify
-                the important columns, visualize the historical trend,
-                and create a simple projection.
-            </div>
+        <div style="font-size:18px;font-weight:700;color:#F5EEF1;margin-bottom:8px;">
+        Bring your own business data
         </div>
-        """,
+        <div style="color:#A89EA4;font-size:13px;line-height:1.6;">
+        Upload a CSV or Excel file. We'll help you identify the important columns,
+        visualize the historical trend, and create a simple projection.
+        </div>
+        </div>""",
         unsafe_allow_html=True
     )
 
