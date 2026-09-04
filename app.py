@@ -2148,15 +2148,6 @@ if page == "Business Insights":
 
 if page == "Forecast Your Business":
 
-    st.markdown(
-        '<div class="eyebrow">YOUR DATA • YOUR BUSINESS</div>'
-        '<div class="page-title">Forecast Your Business</div>'
-        '<div class="page-description">'
-        'Upload your own data and turn historical performance into '
-        'simple forward-looking projections.'
-        '</div>',
-        unsafe_allow_html=True
-    )
 
     st.markdown(
         """<div style="
