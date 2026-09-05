@@ -2149,6 +2149,96 @@ if page == "Business Insights":
 if page == "Forecast Your Business":
 
     
+    # Forecast-specific chart theme
+    st.markdown(
+        """
+        <style>
+        /* Forecast charts/cards */
+        .forecast-chart,
+        [data-testid="stPlotlyChart"] {
+            background: #110E12 !important;
+            border-radius: 14px !important;
+        }
+
+        /* Plotly chart surface */
+        [data-testid="stPlotlyChart"] > div {
+            background-color: #110E12 !important;
+        }
+
+        /* Forecast orange accents */
+        .forecast-orange {
+            color: #F59E0B !important;
+        }
+
+        /* Forecast upload / information accents */
+        [data-testid="stFileUploader"] label {
+            color: #F59E0B !important;
+        }
+
+        /* Keep Streamlit alert boxes dark */
+        [data-testid="stAlert"] {
+            background-color: #110E12 !important;
+            border-color: rgba(245,158,11,0.35) !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Final Forecast orange cleanup
+    st.markdown(
+        """
+        <style>
+        /* Selected Forecast navigation item */
+        [data-testid="stRadio"] label:has(input:checked) {
+            border-color: #F59E0B !important;
+        }
+
+        [data-testid="stRadio"] label:has(input:checked) div {
+            border-color: #F59E0B !important;
+        }
+
+        [data-testid="stRadio"] label:has(input:checked) span {
+            color: #F59E0B !important;
+        }
+
+        [data-testid="stRadio"] label:has(input:checked) input {
+            accent-color: #F59E0B !important;
+        }
+
+        /* Forecast upload label */
+        [data-testid="stFileUploader"] label {
+            color: #F59E0B !important;
+        }
+
+        /* Forecast upload help/info message */
+        [data-testid="stAlert"] {
+            border-color: rgba(245,158,11,0.35) !important;
+        }
+
+        [data-testid="stAlert"] svg {
+            color: #F59E0B !important;
+        }
+
+        [data-testid="stAlert"] p {
+            color: #F59E0B !important;
+        }
+
+        /* Upload button */
+        [data-testid="stFileUploader"] button {
+            border-color: #F59E0B !important;
+        }
+
+        [data-testid="stFileUploader"] button:hover {
+            border-color: #F59E0B !important;
+            color: #F59E0B !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    
     # Forecast-specific orange styling.
     # This override is injected only when the Forecast page is active.
     st.markdown(
